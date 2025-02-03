@@ -249,6 +249,25 @@ void pisca_led()
     sleep_ms(100);
 }
 
+void init_buttons_and_leds()
+{
+
+    gpio_init(button_A);
+    gpio_set_dir(button_A, GPIO_IN); // Define o pino como entrada
+    gpio_pull_up(button_A);          // Habilita o pull-up interno
+
+    gpio_init(button_B);
+    gpio_set_dir(button_B, GPIO_IN); // Define o pino como entrada
+    gpio_pull_up(button_B);
+
+    gpio_init(ledB_pin);
+    gpio_set_dir(ledB_pin, GPIO_OUT); // Define o pino como saída
+    gpio_init(ledA_pin);
+    gpio_set_dir(ledA_pin, GPIO_OUT); // Define o pino como saída
+    gpio_init(ledC_pin);
+    gpio_set_dir(ledC_pin, GPIO_OUT); // Define o pino como saída
+}
+
 int main()
 {
     // Inicializa as entradas e saídas.
@@ -261,24 +280,11 @@ int main()
     // Escreve os dados nos LEDs.
     npWrite();
 
-    gpio_init(button_A);
-    gpio_set_dir(button_A, GPIO_IN); // Define o pino como entrada
-    gpio_pull_up(button_A);          // Habilita o pull-up interno
-
-    gpio_init(button_B);
-    gpio_set_dir(button_B, GPIO_IN); // Define o pino como entrada
-    gpio_pull_up(button_B);
+    init_buttons_and_leds();
 
     // Configura a interrupção com callback
     gpio_set_irq_enabled_with_callback(button_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handlerA);
     gpio_set_irq_enabled(button_B, GPIO_IRQ_EDGE_FALL, true);
-
-    gpio_init(ledB_pin);
-    gpio_set_dir(ledB_pin, GPIO_OUT); // Define o pino como saída
-    gpio_init(ledA_pin);
-    gpio_set_dir(ledA_pin, GPIO_OUT); // Define o pino como saída
-    gpio_init(ledC_pin);
-    gpio_set_dir(ledC_pin, GPIO_OUT); // Define o pino como saída
 
     // Loop infinito.
     while (true)
