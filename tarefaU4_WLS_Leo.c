@@ -12,7 +12,7 @@
 #define LED_COUNT 25
 #define LED_PIN 7
 
-// Configurações dos pinos
+// Configuração dos pinos de LEDs e botões
 const uint ledA_pin = 12; // Blue => GPIO12
 const uint ledB_pin = 11; // Green=> GPIO11
 const uint ledC_pin = 13; // Green=> GPIO11
@@ -34,15 +34,15 @@ static void gpio_irq_handlerA(uint gpio, uint32_t events);
 // Definição de pixel GRB
 struct pixel_t
 {
-    uint8_t G, R, B; // Três valores de 8-bits compõem um pixel.
+    uint8_t G, R, B; // Três valores de 8-bits formam um pixel.
 };
 typedef struct pixel_t pixel_t;
-typedef pixel_t npLED_t; // Mudança de nome de "struct pixel_t" para "npLED_t" por clareza.
+typedef pixel_t npLED_t; // Renomeia a estrutura "pixel_t" para "npLED_t" para maior clareza.
 
-// Declaração do buffer de pixels que formam a matriz.
+// Declaração do buffer de pixels que formam a matriz de LEDs.
 npLED_t leds[LED_COUNT];
 
-// Variáveis para uso da máquina PIO.
+// Variáveis para a máquina PIO.
 PIO np_pio;
 uint sm;
 
@@ -51,8 +51,7 @@ uint sm;
  */
 void npInit(uint pin)
 {
-
-    // Cria programa PIO.
+    // Adiciona o programa PIO.
     uint offset = pio_add_program(pio0, &ws2818b_program);
     np_pio = pio0;
 
@@ -61,13 +60,13 @@ void npInit(uint pin)
     if (sm < 0)
     {
         np_pio = pio1;
-        sm = pio_claim_unused_sm(np_pio, true); // Se nenhuma máquina estiver livre, panic!
+        sm = pio_claim_unused_sm(np_pio, true); // Caso nenhuma máquina esteja livre, faz panic!
     }
 
-    // Inicia programa na máquina PIO obtida.
+    // Inicia o programa na máquina PIO selecionada.
     ws2818b_program_init(np_pio, sm, offset, pin, 800000.f);
 
-    // Limpa buffer de pixels.
+    // Limpa o buffer de LEDs.
     for (uint i = 0; i < LED_COUNT; ++i)
     {
         leds[i].R = 0;
@@ -77,7 +76,7 @@ void npInit(uint pin)
 }
 
 /**
- * Atribui uma cor RGB a um LED.
+ * Atribui uma cor RGB a um LED específico.
  */
 void npSetLED(const uint index, const uint8_t r, const uint8_t g, const uint8_t b)
 {
@@ -87,7 +86,7 @@ void npSetLED(const uint index, const uint8_t r, const uint8_t g, const uint8_t 
 }
 
 /**
- * Limpa o buffer de pixels.
+ * Limpa todos os LEDs da matriz.
  */
 void npClear()
 {
@@ -96,18 +95,18 @@ void npClear()
 }
 
 /**
- * Escreve os dados do buffer nos LEDs.
+ * Envia os dados de cor para os LEDs.
  */
 void npWrite()
 {
-    // Escreve cada dado de 8-bits dos pixels em sequência no buffer da máquina PIO.
+    // Envia os valores de 8 bits dos pixels no buffer da máquina PIO.
     for (uint i = 0; i < LED_COUNT; ++i)
     {
         pio_sm_put_blocking(np_pio, sm, leds[i].G);
         pio_sm_put_blocking(np_pio, sm, leds[i].R);
         pio_sm_put_blocking(np_pio, sm, leds[i].B);
     }
-    sleep_us(100); // Espera 100us, sinal de RESET do datasheet.
+    sleep_us(100); // Atraso de 100us, conforme especificação do datasheet.
 }
 
 int getIndex(int x, int y)
@@ -150,7 +149,6 @@ void matriz_led(int contador)
             }
         }
         npWrite();
-
         break;
     case 2:
         for (int linha = 0; linha < 5; linha++)
@@ -162,7 +160,6 @@ void matriz_led(int contador)
             }
         }
         npWrite();
-
         break;
     case 3:
         for (int linha = 0; linha < 5; linha++)
@@ -254,38 +251,36 @@ void pisca_led()
 
 int main()
 {
-
-    // Inicializa entradas e saídas.
+    // Inicializa as entradas e saídas.
     stdio_init_all();
 
-    // Inicializa matriz de LEDs NeoPixel.
+    // Inicializa a matriz de LEDs NeoPixel.
     npInit(LED_PIN);
     npClear();
 
-    // Aqui, você desenha nos LEDs.
-
-    npWrite(); // Escreve os dados nos LEDs.
+    // Escreve os dados nos LEDs.
+    npWrite();
 
     gpio_init(button_A);
-    gpio_set_dir(button_A, GPIO_IN); // Configura o pino como entrada
+    gpio_set_dir(button_A, GPIO_IN); // Define o pino como entrada
     gpio_pull_up(button_A);          // Habilita o pull-up interno
 
     gpio_init(button_B);
-    gpio_set_dir(button_B, GPIO_IN); // Configura o pino como entrada
+    gpio_set_dir(button_B, GPIO_IN); // Define o pino como entrada
     gpio_pull_up(button_B);
 
-    // Configuração da interrupção com callback
+    // Configura a interrupção com callback
     gpio_set_irq_enabled_with_callback(button_A, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handlerA);
     gpio_set_irq_enabled(button_B, GPIO_IRQ_EDGE_FALL, true);
 
     gpio_init(ledB_pin);
-    gpio_set_dir(ledB_pin, GPIO_OUT); // Configura o pino como entrada
+    gpio_set_dir(ledB_pin, GPIO_OUT); // Define o pino como saída
     gpio_init(ledA_pin);
-    gpio_set_dir(ledA_pin, GPIO_OUT); // Configura o pino como entrada
+    gpio_set_dir(ledA_pin, GPIO_OUT); // Define o pino como saída
     gpio_init(ledC_pin);
-    gpio_set_dir(ledC_pin, GPIO_OUT); // Configura o pino como entrada
+    gpio_set_dir(ledC_pin, GPIO_OUT); // Define o pino como saída
 
-    // Não faz mais nada. Loop infinito.
+    // Loop infinito.
     while (true)
     {
         matriz_led(contador);
@@ -301,21 +296,20 @@ void gpio_irq_handlerA(uint gpio, uint32_t events)
     printf("A = %d\n", a);
     printf("B = %d\n", b);
     printf("contador %d\n", contador);
-    // Verifica se passou tempo suficiente desde o último evento
+
+    // Verifica se já passou o tempo necessário desde o último evento
     if (gpio == button_A && (current_time - last_time > 200000)) // 200 ms de debouncing
     {
         last_time = current_time; // Atualiza o tempo do último evento
-        printf("Mudanca de Estado do Led. A = %d\n", a);
-        // gpio_put(ledA_pin, !gpio_get(ledA_pin)); // Alterna o estado
+        printf("Mudança de Estado do Led. A = %d\n", a);
         a++;
-        contador = (contador + 1) % 10; // Soma circular que reseta quando o valor for acima de 9
+        contador = (contador + 1) % 10; // Soma circular que reseta quando o valor é maior que 9
     }
     if (gpio == button_B && (current_time - last_time > 200000)) // 200 ms de debouncing
     {
         last_time = current_time; // Atualiza o tempo do último evento
-        printf("Mudanca de Estado do Led. B = %d\n", b);
-        // gpio_put(ledA_pin, !gpio_get(ledA_pin)); // Alterna o estado
+        printf("Mudança de Estado do Led. B = %d\n", b);
         b++;
-        contador = (contador - 1 + 10) % 10; // Subtração circular que reseta quando o valor for abaixo de 0
+        contador = (contador - 1 + 10) % 10; // Subtração circular que reseta quando o valor é menor que 0
     }
 }
