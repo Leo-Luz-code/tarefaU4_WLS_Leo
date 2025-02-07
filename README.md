@@ -1,6 +1,6 @@
 ## Projeto: Interrupções e Controle de LEDs no RP2040
 
-Assista à demonstração do projeto aqui: https://www.youtube.com/watch?v=A0cId_PjqpM
+Assista à demonstração do projeto aqui: [https://www.youtube.com/watch?v=A0cId_PjqpM](https://youtube.com/shorts/A0cId_PjqpM?si=u5UgMV_K6KZyAW0L)
 
 Olá! Meu nome é Leonardo Rodrigues Luz, sou aluno do EmbarcaTech e neste projeto, desenvolvi uma aplicação para o microcontrolador RP2040, utilizando a placa de desenvolvimento BitDogLab. O objetivo principal foi consolidar o entendimento sobre interrupções, controle de LEDs, tratamento de "bouncing" de botões e manipulação de LEDs endereçáveis WS2812.
 
